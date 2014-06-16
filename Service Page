@@ -1,0 +1,502 @@
+<?php
+
+App::uses('AppController', 'Controller');
+
+/**
+
+ * Services Controller
+
+ *
+
+ * @property Service $Service
+
+ */
+
+class ServicesController extends AppController {
+
+
+
+	public $layout = 'defaultGary';
+
+/**
+
+ * index method
+
+ *
+
+ * @return void
+
+ */
+
+	public function index() 
+
+        {
+
+            $this->Service->recursive = 0;
+
+            $this->set('services', $this->paginate());
+
+	}
+
+
+
+/**
+
+ * view method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function view($id = null) 
+
+        {
+
+            $this->Service->id=$id;
+
+            $this->Service->ServiceRange->service_id = $id;
+
+            if (!$this->Service->exists()) 
+
+            {
+
+                throw new NotFoundException(__('Invalid service'));
+
+            }
+
+            $this->set('service', $this->Service->read(null, $id));
+
+            $this->set('sranges', $this->Service->ServiceRange->findAllByservice_id($this->Service->ServiceRange->service_id));
+
+            $this->set('servicerange',$this->Service->ServiceRange->read(null,$id));
+
+            $this->set('serviceprocess', $this->Service->ServiceProcess->read(null, $id));
+
+            $this->set(compact('sranges'));
+
+            $this->request->data=$this->Service->read(null,$id);
+
+            $this->set('serviceprocess', $this->Service->ServiceProcess->read(null, $id));
+
+            $this->Service->ServiceRange->service_id=$id;
+
+            $this->set('serviceranges', $this->Service->ServiceRange->findAllByservice_id($this->Service->ServiceRange->service_id));
+
+            $servicerange=$this->Service->ServiceRange->find('first',array('conditions'=>(array('ServiceRange.service_id'=>$id))));
+
+            $this->set('servicerange', $servicerange);
+
+        }
+
+                
+
+	
+
+	public function add() 
+
+        {
+
+            if ($this->request->is('post')) 
+
+            {
+
+                $this->Service->create();
+
+                if ($this->Service->save($this->request->data)) 
+
+                    {
+
+                        $this->Session->setFlash(__('The service has been saved'));
+
+                        $this->redirect(array('action' => 'index'));
+
+                    } 
+
+                    else 
+
+                    {
+
+                        $this->Session->setFlash(__('The service could not be saved. Please, try again.'));
+
+                    }
+
+            }
+
+	}
+
+
+
+/**
+
+ * edit method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function edit($id = null)
+
+        {
+
+            $this->Service->id = $id;
+
+            if (!$this->Service->exists()) 
+
+            {
+
+                throw new NotFoundException(__('Invalid service'));
+
+            }
+
+            if ($this->request->is('post') || $this->request->is('put'))
+
+            {
+
+                if ($this->Service->save($this->request->data)) 
+
+                {
+
+                    $this->Session->setFlash(__('The service has been saved'));
+
+                    $this->redirect(array('action' => 'index'));
+
+		} else 
+
+                {
+
+                    $this->Session->setFlash(__('The service could not be saved. Please, try again.'));
+
+		}
+
+            } else 
+
+            {
+
+                
+
+                $this->request->data = $this->Service->read(null, $id);
+
+            }
+
+	}
+
+
+
+/**
+
+ * delete method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function delete($id = null)
+
+        {
+
+            if (!$this->request->is('post')) 
+
+            {
+
+                throw new MethodNotAllowedException();
+
+            }
+
+            $this->Service->id = $id;
+
+            if (!$this->Service->exists()) 
+
+            {
+
+                throw new NotFoundException(__('Invalid service'));
+
+            }
+
+            if ($this->Service->delete()) 
+
+            {
+
+                $this->Session->setFlash(__('Service deleted'));
+
+		$this->redirect(array('action' => 'index'));
+
+            }
+
+            $this->Session->setFlash(__('Service was not deleted'));
+
+            $this->redirect(array('action' => 'index'));
+
+	}
+
+/**
+
+ * admin_index method
+
+ *
+
+ * @return void
+
+ */
+
+	public function admin_index() {
+
+		$this->Service->recursive = 0;
+
+		$this->set('services', $this->paginate());
+
+	}
+
+
+
+/**
+
+ * admin_view method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function admin_view($id = null) {
+
+		$this->Service->id = $id;
+
+		if (!$this->Service->exists()) {
+
+			throw new NotFoundException(__('Invalid service'));
+
+		}
+
+		$this->set('service', $this->Service->read(null, $id));
+
+		$this->set($service, 'service');
+
+		
+
+	}
+
+
+
+/**
+
+ * admin_add method
+
+ *
+
+ * @return void
+
+ */
+
+	public function admin_add() {
+
+		if ($this->request->is('post')) {
+
+			$this->Service->create();
+
+			if ($this->Service->save($this->request->data)) {
+
+				$this->Session->setFlash(__('The service has been saved'));
+
+				$this->redirect(array('action' => 'index'));
+
+			} else {
+
+				$this->Session->setFlash(__('The service could not be saved. Please, try again.'));
+
+			}
+
+		}
+
+	}
+
+
+
+/**
+
+ * admin_edit method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function admin_edit($id = null) {
+
+            $this->Service->id = $id;
+
+            if (!$this->Service->exists()) {
+
+		throw new NotFoundException(__('Invalid service'));
+
+            }
+
+            if ($this->request->is('post') || $this->request->is('put')) {
+
+                
+
+                  //fetching the main image
+
+                $mainimg = $this->request->data['Service']['pageimage'];
+
+                $pimg = $mainimg['name'];
+
+                //Moving to files folder
+
+                if ($mainimg['error'] === UPLOAD_ERR_OK){
+
+                    move_uploaded_file($mainimg['tmp_name'], APP.'webroot'.DS.'img'.DS.$pimg);
+
+                }
+
+                 //the uploaded file renamed 
+
+                $this->request->data['Service']['pageimage'] = $pimg;
+
+                  //fetching icon
+
+                $icon = $this->request->data['Service']['icon'];
+
+                $img = $icon['name'];
+
+                //Moving to files folder
+
+                if ($icon['error'] === UPLOAD_ERR_OK){
+
+                    move_uploaded_file($icon['tmp_name'], APP.'webroot'.DS.'img'.DS.$img);
+
+                }
+
+                 //the uploaded file renamed 
+
+                $this->request->data['Service']['icon'] = $img;
+
+                 //fetching first image
+
+                $file = $this->request->data['Service']['work_image'];
+
+                $newimage=$file['name']; 
+
+                 //Moving to files folder
+
+                if ($file['error'] === UPLOAD_ERR_OK){
+
+                    move_uploaded_file($file['tmp_name'], APP.'webroot'.DS.'img'.DS.$newimage);
+
+                }
+
+      
+
+                //the uploaded file renamed 
+
+                $this->request->data['Service']['work_image'] = $newimage;
+
+                //fetching second image
+
+                $file2 = $this->request->data['Service']['work_image2'];
+
+                 $newimage2=$file2['name']; 
+
+             
+
+                 //Moving to files folder
+
+                 if ($file2['error'] === UPLOAD_ERR_OK){
+
+                    move_uploaded_file($file2['tmp_name'], APP.'webroot'.DS.'img'.DS.$newimage2);
+
+                 }
+
+                 //the uploaded file renamed 
+
+                 $this->request->data['Service']['work_image2'] =$newimage2;
+
+                 if ($this->Service->save($this->request->data)) {
+
+                    $this->Session->setFlash(__('The image has been saved'));
+
+                    $this->redirect(array('action' => 'index'));
+
+                 } else {
+
+                    $this->Session->setFlash(__('The image could not be saved. Please, try again.'));
+
+			}
+
+		} 
+
+                else {
+
+                    $this->request->data = $this->Service->read(null, $id);
+
+		}
+
+	}
+
+
+
+/**
+
+ * admin_delete method
+
+ *
+
+ * @param string $id
+
+ * @return void
+
+ */
+
+	public function admin_delete($id = null) {
+
+		if (!$this->request->is('post')) {
+
+			throw new MethodNotAllowedException();
+
+		}
+
+		$this->Service->id = $id;
+
+		if (!$this->Service->exists()) {
+
+			throw new NotFoundException(__('Invalid service'));
+
+		}
+
+		if ($this->Service->delete()) {
+
+			$this->Session->setFlash(__('Service deleted'));
+
+			$this->redirect(array('action' => 'index'));
+
+		}
+
+		$this->Session->setFlash(__('Service was not deleted'));
+
+		$this->redirect(array('action' => 'index'));
+
+	}
+
+    
+
+}
+
+
+
